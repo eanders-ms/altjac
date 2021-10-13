@@ -4,17 +4,35 @@
 <head>
     <meta charset="utf-8" />
     <title>AltJac - Control AltspaceVR with Jacdac gadgets</title>
-    <link rel="stylesheet" href="styles.css" />
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+
+    <!-- CSS Reset -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
+
+    <!-- Milligram CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
     <script type="module" src="index.ts"></script>
 </head>
 
 <body>
-    <h1>AltJac - Control AltspaceVR with Jacdac gadgets</h1>
+    <h1>AltJac = AltspaceVR + Jacdac</h1>
     <div>
-        <button id="connectbtn">connect</button>
+        <button id="debugbtn">Open Dev Tools</button>
+        <button id="connectbtn">Connect Device</button>
     </div>
-    <pre id="log"></pre>
-
+    <div>
+        <form>
+            <fieldset>
+                <label>Altspace address</label>
+                <input type="text" id="wsAddress" value="ws://localhost:3535" />
+                <button id="wsConnect" title="Connect">Connect</button>
+                <span>&nbsp;</span>
+                <small id="wsStatus">Disconnected</small>
+            </fieldset>
+        </form>
+    </div>
+    <hr />
     <footer>
         <small>
             Need to learn more about Jacdac?

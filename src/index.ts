@@ -1,29 +1,130 @@
-import { CHANGE, snapshotSensors } from "jacdac-ts";
-import "milligram";
+import { snapshotSensors, startDevTools, JoystickButtons } from "jacdac-ts";
 import { initBus } from "./bus";
 
-const connectEl = document.getElementById("connectbtn") as HTMLButtonElement;
-const logEl = document.getElementById("log") as HTMLPreElement;
-const log = (msg: any) => {
-  console.log(msg);
-  logEl.innerText += msg + "\n";
-};
+const debugEl = document.getElementById("debugbtn") as HTMLButtonElement;
+const connectDeviceEl = document.getElementById("connectbtn") as HTMLButtonElement;
+const wsAddressEl = document.getElementById("wsAddress") as HTMLInputElement;
+const wsConnectEl = document.getElementById("wsConnect") as HTMLButtonElement;
+const wsStatusEl = document.getElementById("wsStatus") as HTMLElement;
 
 const bus = initBus();
+let ws: WebSocket;
+let wsIsOpen = false;
 
-connectEl.onclick = async () =>
-  bus.connected ? bus.disconnect() : bus.connect();
+if (window.location.ancestorOrigins.length) {
+  debugEl.remove();
+  connectDeviceEl.remove();
+} else {
+  debugEl.onclick = (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (!window.location.ancestorOrigins.length) {
+      startDevTools();
+    }
+  }
+  connectDeviceEl.onclick = (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    bus.connected ? bus.disconnect() : bus.connect();
+  }
+}
 
-// we're ready
-log("click connect to start");
+wsConnectEl.onclick = (ev) => {
+  ev.preventDefault();
+  ev.stopPropagation();
+  altspaceConnect(wsAddressEl.value);
+}
 
-bus.on(CHANGE, () => {
-  const services = bus.services();
-  const devices = bus.devices();
+type Button = {
+  down: boolean;
+  pressed: boolean;
+  released: boolean;
+};
 
-  log(`services ${services.length}`);
-  services.forEach(service => log(`--${service.friendlyName}`));
-  log(`devices ${devices.length}`);
-  devices.forEach(device => log(`--${device.friendlyName}`));
+type Stick = {
+  x: number;
+  y: number;
+};
 
-});
+type Input = {
+  button: Button;
+  stick: Stick;
+};
+
+const input: Input = {
+  button: {
+    down: false,
+    pressed: false,
+    released: false
+  },
+  stick: {
+    x: 0,
+    y: 0
+  }
+};
+
+
+function step() {
+  const snap = snapshotSensors(bus);
+  //const str = JSON.stringify(snap);
+  //console.log(str);
+  const joysticks = snap.joystick;
+  if (joysticks.length) {
+    const joystick = joysticks[0];
+    const buttons = Number(joystick["buttons"]);
+    // Update button state
+    input.button.pressed = false;
+    input.button.released = false;
+    if (buttons & JoystickButtons.A) {
+      input.button.pressed = !input.button.down;
+      input.button.down = true;
+    } else {
+      input.button.released = input.button.down;
+      input.button.down = false;
+    }
+    // Update stick state
+    input.stick.x = Number(joystick["x"]) || 0;
+    input.stick.y = Number(joystick["y"]) || 0;
+    //console.log(JSON.stringify(input));
+    if (wsIsOpen) {
+      const msg = {
+        type: 'input',
+        state: input
+      };
+      try {
+        ws.send(JSON.stringify(msg));
+      }
+      catch {
+        ws.close();
+        ws = null;
+      }
+    }
+  }
+  window.requestAnimationFrame(step);
+}
+window.requestAnimationFrame(step);
+
+function setSocketStatus(msg: string) {
+  wsStatusEl.innerText = msg;
+}
+
+function altspaceConnect(address: string) {
+  if (ws) {
+    ws.close();
+  }
+  setSocketStatus("Connecting...");
+  ws = new WebSocket(address);
+  ws.onclose = (ev) => {
+    setSocketStatus("Disconnected");
+    wsIsOpen = false;
+    ws = null;
+  };
+  ws.onerror = (ev) => {
+    setSocketStatus("Error");
+    wsIsOpen = false;
+  };
+  ws.onopen = (ev) => {
+    setSocketStatus("Connected");
+    wsIsOpen = true;
+  };
+}
