@@ -2,12 +2,14 @@
   "name": "altjac",
   "version": "1.0.0",
   "description": "Experiment to control AltspaceVR with Jacdac gadgets",
-  "main": "dist/index.html",
   "scripts": {
     "start": "parcel src/index.html --open",
     "build": "parcel build src/index.html"
   },
   "license": "MIT",
+  "browserslist": [
+    "last 1 Chrome version"
+  ],
   "keywords": [
     "jacdac",
     "microbit",
@@ -20,6 +22,7 @@
   "dependencies": {
     "jacdac-ts": "^1.18.13",
     "milligram": "^1.4.1",
-    "parcel-bundler": "^1.12.5"
+    "parcel": "^2.0.0-rc.0",
+    "webusb": "^2.2.0"
   }
 }
