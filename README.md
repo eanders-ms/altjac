@@ -26,6 +26,4 @@ This runs [parcel](https://parceljs.org/), a local web server. It will rebuild t
 
 ### Host in Jacdac devtools
 
-Open this address in a new tab: https://microsoft.github.io/jacdac-docs/clients/javascript/devtools#http://localhost:1234
-
-This will host AltJac side-by-side with the Jacdac dev tools.
+In AltJac, click the "Open Dev Tools" button. This will host AltJac side-by-side with the Jacdac dev tools.

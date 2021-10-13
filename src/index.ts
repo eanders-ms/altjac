@@ -110,14 +110,13 @@ function setSocketStatus(msg: string) {
 
 function altspaceConnect(address: string) {
   if (ws) {
-    ws.close();
+    try { ws.close(); } catch { }
   }
   setSocketStatus("Connecting...");
   ws = new WebSocket(address);
   ws.onclose = (ev) => {
     setSocketStatus("Disconnected");
     wsIsOpen = false;
-    ws = null;
   };
   ws.onerror = (ev) => {
     setSocketStatus("Error");
