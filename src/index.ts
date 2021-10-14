@@ -140,22 +140,26 @@ function altspaceConnect(address: string) {
   if (ws) {
     try { ws.close(); } catch { }
   }
-  setSocketStatus("Connecting...");
-  ws = new WebSocket(address + '/jacdac');
-  ws.onclose = (ev) => {
+  try {
+    setSocketStatus("Connecting...");
+    ws = new WebSocket(address + '/jacdac');
+    ws.onclose = (ev) => {
+      setSocketStatus("Disconnected");
+      wsConnectEl.textContent = "Connect";
+      state.wsIsOpen = false;
+    };
+    ws.onerror = (ev) => {
+      setSocketStatus("Error");
+      wsConnectEl.textContent = "Connect";
+      state.wsIsOpen = false;
+    };
+    ws.onopen = (ev) => {
+      setSocketStatus("Connected");
+      wsConnectEl.textContent = "Disconnect";
+      state.wsIsOpen = true;
+      sendModel();
+    };
+  } catch (e) {
     setSocketStatus("Disconnected");
-    wsConnectEl.textContent = "Connect";
-    state.wsIsOpen = false;
-  };
-  ws.onerror = (ev) => {
-    setSocketStatus("Error");
-    wsConnectEl.textContent = "Connect";
-    state.wsIsOpen = false;
-  };
-  ws.onopen = (ev) => {
-    setSocketStatus("Connected");
-    wsConnectEl.textContent = "Disconnect";
-    state.wsIsOpen = true;
-    sendModel();
-  };
+  }
 }
