@@ -22,7 +22,7 @@
     "typescript": "^4.4.4"
   },
   "dependencies": {
-    "jacdac-ts": "^1.18.13",
+    "jacdac-ts": "latest",
     "parcel": "^2.0.0-rc.0",
     "webusb": "^2.2.0"
   }

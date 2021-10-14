@@ -6,10 +6,15 @@ const connectDeviceEl = document.getElementById("connectbtn") as HTMLButtonEleme
 const wsAddressEl = document.getElementById("wsAddress") as HTMLInputElement;
 const wsConnectEl = document.getElementById("wsConnect") as HTMLButtonElement;
 const wsStatusEl = document.getElementById("wsStatus") as HTMLElement;
+const modelSelectEl = document.getElementById("modelField") as HTMLSelectElement;
 
-const bus = initBus();
-let ws: WebSocket;
-let wsIsOpen = false;
+const state = {
+  bus: initBus(),
+  wsIsOpen: false,
+  model: "model-joy-and-btn"
+};
+
+let ws: WebSocket = null;
 
 if (window.location.ancestorOrigins.length) {
   debugEl.remove();
@@ -25,14 +30,21 @@ if (window.location.ancestorOrigins.length) {
   connectDeviceEl.onclick = (ev) => {
     ev.preventDefault();
     ev.stopPropagation();
-    bus.connected ? bus.disconnect() : bus.connect();
+    state.bus.connected ? state.bus.disconnect() : state.bus.connect();
   }
 }
 
 wsConnectEl.onclick = (ev) => {
   ev.preventDefault();
   ev.stopPropagation();
-  altspaceConnect(wsAddressEl.value);
+  state.wsIsOpen ? ws.close() : altspaceConnect(wsAddressEl.value);
+}
+
+modelSelectEl.onchange = (ev) => {
+  ev.preventDefault();
+  ev.stopPropagation();
+  state.model = ev.target["value"];
+  sendModel();
 }
 
 type Button = {
@@ -65,7 +77,7 @@ const input: Input = {
 
 
 function step() {
-  const snap = snapshotSensors(bus);
+  const snap = snapshotSensors(state.bus);
   //const str = JSON.stringify(snap);
   //console.log(str);
   const joysticks = snap.joystick;
@@ -86,18 +98,8 @@ function step() {
     input.stick.x = Number(joystick["x"]) || 0;
     input.stick.y = Number(joystick["y"]) || 0;
     //console.log(JSON.stringify(input));
-    if (wsIsOpen) {
-      const msg = {
-        type: 'input',
-        state: input
-      };
-      try {
-        ws.send(JSON.stringify(msg));
-      }
-      catch {
-        ws.close();
-        ws = null;
-      }
+    if (state.wsIsOpen) {
+      sendState();
     }
   }
   window.requestAnimationFrame(step);
@@ -108,22 +110,52 @@ function setSocketStatus(msg: string) {
   wsStatusEl.innerText = msg;
 }
 
+function sendState() {
+  send({
+    type: 'input',
+    input
+  });
+}
+
+function sendModel() {
+  send({
+    type: 'model',
+    model: state.model
+  });
+}
+
+function send(msg: any) {
+  if (state.wsIsOpen) {
+    try {
+      ws.send(JSON.stringify(msg));
+    }
+    catch {
+      ws.close();
+      ws = null;
+    }
+  }
+}
+
 function altspaceConnect(address: string) {
   if (ws) {
     try { ws.close(); } catch { }
   }
   setSocketStatus("Connecting...");
-  ws = new WebSocket(address);
+  ws = new WebSocket(address + '/jacdac');
   ws.onclose = (ev) => {
     setSocketStatus("Disconnected");
-    wsIsOpen = false;
+    wsConnectEl.textContent = "Connect";
+    state.wsIsOpen = false;
   };
   ws.onerror = (ev) => {
     setSocketStatus("Error");
-    wsIsOpen = false;
+    wsConnectEl.textContent = "Connect";
+    state.wsIsOpen = false;
   };
   ws.onopen = (ev) => {
     setSocketStatus("Connected");
-    wsIsOpen = true;
+    wsConnectEl.textContent = "Disconnect";
+    state.wsIsOpen = true;
+    sendModel();
   };
 }

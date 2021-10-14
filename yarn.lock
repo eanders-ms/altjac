@@ -3231,10 +3231,10 @@ isstream@~0.1.2:
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
   integrity sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=
 
-jacdac-ts@^1.18.13:
-  version "1.18.14"
-  resolved "https://registry.yarnpkg.com/jacdac-ts/-/jacdac-ts-1.18.14.tgz#a892aa6349bdeb16fdb943d1cfb445ace641c49b"
-  integrity sha512-AJCL8+oE3DWpGbQmdtne+qYfYIL3uCojLT7otVuGvEH6TYWdwd/72flqTosG/nFPkQKUp492N3GdtKWzFSzJsw==
+jacdac-ts@latest:
+  version "1.18.15"
+  resolved "https://registry.yarnpkg.com/jacdac-ts/-/jacdac-ts-1.18.15.tgz#feffa400800d7d5d39f6b700d71a6dab2845f82a"
+  integrity sha512-uUYSIFnp4+69EH1mppAlL/nvePub/PJM5OUpJWdJ9SmZ59vj/+tAWJk1R4oMzeA17Or28dwBGCN2Ha40kg1OHg==
   dependencies:
     "@types/node" "^16.10.3"
     "@types/w3c-web-serial" "^1.0.2"
