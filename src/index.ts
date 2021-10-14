@@ -142,7 +142,7 @@ function altspaceConnect(address: string) {
   }
   try {
     setSocketStatus("Connecting...");
-    ws = new WebSocket(address + '/jacdac');
+    ws = new WebSocket(address);
     ws.onclose = (ev) => {
       setSocketStatus("Disconnected");
       wsConnectEl.textContent = "Connect";
